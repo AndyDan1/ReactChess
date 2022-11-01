@@ -1,56 +1,57 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React, {useEffect, useState} from 'react';
+import './App.scss';
+import BoardComp from "./components/BoardComp";
+import {Board} from "./models/Board";
+import {Player} from "./models/Player";
+import {Colors} from "./models/Colors";
+import LostFigures from "./components/LostFigures";
+import Timer from "./components/Timer";
 
 function App() {
+  const [board, setBoard] = useState(new Board())
+  const [whitePlayer, setWhitePlayer] = useState(new Player(Colors.WHITE))
+  const [blackPlayer, setBlackPlayer] = useState(new Player(Colors.BLACK))
+  const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null)
+
+  const restart = () => {
+    const newBoard = new Board();
+    newBoard.initCells()
+    newBoard.addFigures()
+    setBoard(newBoard)
+  }
+
+  const swapPlayer = () => {
+    setCurrentPlayer(currentPlayer?.color === Colors.WHITE ? blackPlayer : whitePlayer)
+  }
+
+  useEffect(() => {
+    restart()
+    setCurrentPlayer(whitePlayer)
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
+    <div className='App'>
+      <Timer
+        currentPlayer={currentPlayer}
+        restart={restart}
+      />
+      <BoardComp
+        board={board}
+        setBoard={setBoard}
+        currentPlayer={currentPlayer}
+        swapPlayer={swapPlayer}
+
+      />
+      <div>
+        <LostFigures
+          title="Черные фигуры"
+          figures={board.lostBlackFigure}
+        />
+        <LostFigures
+          title="Белые фигуры"
+          figures={board.lostWhiteFigure}
+        />
+      </div>
     </div>
   );
 }
